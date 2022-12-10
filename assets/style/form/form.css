@@ -1,0 +1,239 @@
+.form {
+  overflow: hidden;
+}
+
+.form__fieldset {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(5, 1fr);
+  gap: 12px 24px;
+  grid-template-areas: 
+  "name description"
+  "category description"
+  "units count"
+  "discount price"
+  ". file";
+  padding: 28px;
+  margin: 0 0 32px 0;
+  background-color: #fff;
+  box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
+  border: none;
+  border-radius: 8px;
+}
+
+.form__block-name {
+  grid-area: name;
+}
+
+.form__block-category {
+  grid-area: category;
+}
+
+.form__block-units {
+  grid-area: units;
+}
+
+.form__block-discount {
+  grid-area: discount;
+}
+
+.form__block-description {
+  grid-area: description;
+}
+
+.form__block-count {
+  grid-area: count;
+}
+
+.form__block-price {
+  grid-area: price;
+}
+
+.form__block-file {
+  grid-area: file;
+  padding: 20px 0 0 0;
+}
+
+.form__label {
+  display: block;
+  padding: 0 0 0 10px;
+  margin: 0 0 5px 0;
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 15px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.form__input {
+  width: 100%;
+  padding: 2px 10px 2px 10px;
+  line-height: 36px;
+  font-size: 16px;
+  font-weight: 400;
+  color: #333;
+  background-color: var(--light-purple, #f4f2ff);
+  border: none;
+  border-radius: 6px;
+}
+
+.form__input:focus {
+  outline: 1px solid #5341b5;
+}
+
+.form__input[disabled] {
+  background-color: #eee;
+}
+
+.form__input_type_file {
+  padding: 0;
+  max-height: 39px;
+  position: relative;
+}
+
+.form__input_type_file::after {
+  content: 'Добавить изображение';
+  display: block;
+  padding: 11px 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 17px;
+  text-transform: uppercase;
+  text-align: center;
+  color: #fff;
+  background-color: var(--highlight-purple, #6d5bd0);
+  cursor: pointer;
+  transition: background-color .2s ease;
+}
+
+.form__input_type_file:hover::after {
+  background-color: #5341b5;
+}
+
+.form__input_type_file:hover::after {
+  background-color: #5341b5;
+}
+
+.form__input_type_file:focus::after {
+  background-color: #5341b5;
+  outline: none;
+}
+
+.form__input_type_file:active::after {
+  background-color: #4433a0;
+}
+
+.form__checkbox-container {
+  padding: 0 0 0 50px;
+  position: relative;
+}
+
+.form__checkbox {
+  position: absolute;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  margin-left: -50px;
+  cursor: pointer;
+}
+
+.form__checkbox:focus {
+  outline: none;
+}
+
+.form__checkbox:focus:before {
+  outline: 1px solid #5341b5;
+}
+
+.form__checkbox:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  width: 40px;
+  height: 40px;
+  background-color: var(--light-purple, #f4f2ff);
+  border-radius: 6px;
+}
+
+.form__checkbox:after {
+  content: '';
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  width: 30px;
+  height: 30px;
+  background: url('../form/img/check.svg');
+  opacity: 0;
+}
+
+.form__checkbox:checked:after{
+  opacity: 1;
+}
+
+.form__input_type_textarea {
+  padding: 11px 10px 11px 10px;
+  line-height: 18px;
+  resize: none;
+}
+
+.form__input_type_textarea:focus {
+  outline: 1px solid #5341b5;
+}
+
+.form__button {
+  float: right;
+  padding: 10px 25px;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 19px;
+  text-transform: uppercase;
+  color: #fff;
+  background: var(--highlight-purple, #6d5bd0);
+  border: none;
+  border-radius: 6px;
+  transition: background .2s ease;
+}
+
+.form__button:hover {
+  background: #5341b5;
+}
+
+.form__button:focus {
+  background: #5341b5;
+  outline: none;
+}
+
+.form__button:active {
+  background: #4433a0;
+}
+
+@media (max-width:750px) {
+  .form__fieldset {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(9, 1fr);
+    gap: 12px;
+    grid-template-areas: 
+    "name"
+    "category"
+    "units"
+    "discount"
+    "description"
+    "description"
+    "count"
+    "price"
+    "file";
+  }
+
+  .form__button {
+  float: unset;
+  width: 100%;
+  }
+}
