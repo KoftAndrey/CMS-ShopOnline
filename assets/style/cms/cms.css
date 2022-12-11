@@ -293,6 +293,7 @@
 .cms__table-data_type_unit {
     min-width: 55px;
     max-width: 55px;
+    text-align: center;
 }
 
 .cms__table-data_type_count {
