@@ -6,6 +6,6 @@
     const productCategory =  'Одежда';
     let productPrice = 10000;
 
-    console.log (productName);
-    console.log (productCount * productPrice);
+    console.log ('Наименование товара: "' + productName + '".');
+    console.log ('Общая сумма: ' + productCount * productPrice + '.');
 }
