@@ -1,6 +1,5 @@
 .cms {
     max-width: 1140px;
-    min-width: 1140px;
     padding: 0 20px 20px 20px;
     margin: 0 auto;
 }
@@ -55,6 +54,7 @@
     max-height: 40px;
     margin: 0 20px 0 0;
     padding: 10px;
+    min-width: 110px;
     font-weight: 400;
     font-size: 16px;
     color: var(--main-text, #25213b);
@@ -147,6 +147,7 @@
 
 .cms__product-button {
     padding: 10px 15px;
+    min-width: 180px;
     font-weight: 600;
     font-size: 16px;
     line-height: 20px;
@@ -173,6 +174,10 @@
 
 .cms__product-button:active {
     background-color: #4433a0;
+}
+
+.cms__table-box {
+    overflow-x: auto;
 }
 
 .cms__table {
@@ -414,4 +419,53 @@
 
 .cms__button-prev:active, .cms__button-next:active {
     color: #4433a0;
+}
+
+@media (max-width:820px) {
+    .cms__search-form {
+        margin: 0 20px 0 0;
+        width: 100%;
+    }
+
+    .cms__search-input {
+      min-width: 230px;
+    }   
+}
+
+@media (max-width:750px) {
+    .cms__actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+    .cms__table-filter {
+        padding: 10px 10px 10px calc(50% - 45px);
+        text-align: center;
+        align-items: center;
+        margin: 0;
+    }
+}
+
+@media (max-width:600px) {
+    .cms__block-top {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+        padding-bottom: 11px;
+    }
+
+    .cms__table-footer {
+      justify-content: space-between;
+    }
+
+    .cms__shown-controller {
+        margin: 0 30px 0 0;
+    }
+
+    .cms__shown-counter {
+        margin: 0 30px 0 0;
+    }
+
+    .cms__button-prev {
+        margin: 0 25px 0 0;
+    }
 }
