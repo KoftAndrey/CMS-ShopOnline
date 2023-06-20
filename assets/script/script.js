@@ -150,19 +150,17 @@ const goods = [
 const openModal = () => {
   const btnAdd = document.querySelector('.cms__product-button');
   const modalOverlay = document.querySelector('.overlay');
-  const modal = document.querySelector('.modal');
   const modalClose = document.querySelector('.modal__close');
 
   btnAdd.addEventListener('click', () => {
     modalOverlay.classList.add('overlay_visible');
   });
 
-  modal.addEventListener('click', event => {
-    event.stopImmediatePropagation();
-  });
-
-  modalOverlay.addEventListener('click', () => {
-    modalOverlay.classList.remove('overlay_visible');
+  modalOverlay.addEventListener('click', e => {
+    const target = e.target;
+    if (target === modalOverlay || target.classList.contains('modal__close')) {
+      modalOverlay.classList.remove('overlay_visible');
+    }
   });
 
   modalClose.addEventListener('click', () => {
@@ -170,5 +168,20 @@ const openModal = () => {
   });
 };
 
+const delListItem = () => {
+  const tBody = document.querySelector('.cms__table-body');
+  tBody.addEventListener('click', e => {
+    if (e.target.closest('.cms__table-button_type_delete')) {
+      const id = e.target.closest('.cms__table-row').cells[0].textContent;
+      e.target.closest('.cms__table-row').remove();
+      goods.forEach((v, i) => {
+        if ((v.id + '') === id) goods.splice(i, 1);
+      });
+      console.log('Список товаров:\n', goods);
+    }
+  });
+};
+
 renderGoods(goods);
 openModal();
+delListItem();
