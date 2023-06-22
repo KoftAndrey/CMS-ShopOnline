@@ -1,15 +1,33 @@
 'use strict';
 
+const mainCost = document.querySelector('.cms__total-price_content_value');
+const tableBody = document.querySelector('.cms__table-body');
 const modalHeader = document.querySelector('.modal__title');
 const modalId = document.querySelector('.modal__id');
 const modalForm = document.querySelector('.modal__form');
 const modalCheckboxButton = document.querySelector('.form__checkbox');
-const modalCheckboxInput = document.querySelector('.form__input');
+const modalCheckboxInput = document.querySelector('[name="discount"]');
 const modalCost = document.querySelector('.modal__total-price_content_value');
+const btnAdd = document.querySelector('.cms__product-button');
+const modalOverlay = document.querySelector('.overlay');
+const modalClose = document.querySelector('.modal__close');
+
+const checkboxControl = () => {
+  modalCheckboxButton.addEventListener('click', () => {
+    if (modalCheckboxInput.disabled) {
+      modalCheckboxInput.disabled = false;
+      modalCheckboxInput.focus();
+    } else {
+      modalCheckboxInput.value = null;
+      modalCheckboxInput.focus();
+      modalCheckboxInput.disabled = true;
+    }
+  });
+};
 
 const checkImages = ({small, big}) => {
   let imageButton;
-  if (small === '' || big === '') {
+  if (!small || !big) {
     imageButton = `
     <button class="cms__table-button cms__table-button_type_image-not-uploaded" type="button">
       <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -33,7 +51,7 @@ const checkImages = ({small, big}) => {
   return imageButton;
 };
 
-const createTableRow = ({id, title, category, units, count, price, images}) => {
+const createTableRow = ({id, title, category, units, count, price, images = {}}) => {
   const newTableRow = document.createElement('tr');
   newTableRow.classList.add('cms__table-row');
   newTableRow.innerHTML =
@@ -68,9 +86,33 @@ const createTableRow = ({id, title, category, units, count, price, images}) => {
   return newTableRow;
 };
 
+const calculateModalTotalPrice = () => {
+  if (modalForm.count.value && modalForm.price.value) {
+    let totalPrice;
+    if (modalForm.discount.value) {
+      totalPrice = '₽ ' + modalForm.count.value * modalForm.price.value * (1 - modalForm.discount.value * 0.01)  + '.00';
+    } else {
+      totalPrice = '₽ ' + modalForm.count.value * modalForm.price.value  + '.00';
+    }
+    return totalPrice;
+  } else {
+    return '₽ 0.00';
+  }
+};
+
+const calculateMainTotalPrice = () => {
+  let mainTotalPrice = 0;
+  const allPrices = document.querySelectorAll('.cms__table-data_type_total');
+  for (const price of allPrices) {
+    mainTotalPrice += +price.textContent;
+  }
+  mainCost.textContent = '₽ ' + mainTotalPrice + '.00';
+};
+
 const renderGoods = (arr) => {
   const tableRowArr = arr.map(createTableRow);
-  document.querySelector('.cms__table-body').append(...tableRowArr);
+  tableBody.append(...tableRowArr);
+  calculateMainTotalPrice();
 };
 
 const goods = [
@@ -148,10 +190,6 @@ const goods = [
 ];
 
 const openModal = () => {
-  const btnAdd = document.querySelector('.cms__product-button');
-  const modalOverlay = document.querySelector('.overlay');
-  const modalClose = document.querySelector('.modal__close');
-
   btnAdd.addEventListener('click', () => {
     modalOverlay.classList.add('overlay_visible');
   });
@@ -165,6 +203,34 @@ const openModal = () => {
 
   modalClose.addEventListener('click', () => {
     modalOverlay.classList.remove('overlay_visible');
+  });
+};
+
+const checkModalTotalPrice = form => {
+  modalCheckboxInput.addEventListener('blur', () => {
+    modalCost.textContent = calculateModalTotalPrice();
+  });
+
+  form.count.addEventListener('blur', () => {
+    modalCost.textContent = calculateModalTotalPrice();
+  });
+
+  form.price.addEventListener('blur', () => {
+    modalCost.textContent = calculateModalTotalPrice();
+  });
+};
+
+const getFormData = form => {
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const productData = Object.fromEntries(formData);
+    goods.unshift(productData);
+
+    form.reset();
+    modalOverlay.classList.remove('overlay_visible');
+    tableBody.prepend(createTableRow(productData));
+    calculateMainTotalPrice();
   });
 };
 
@@ -185,3 +251,6 @@ const delListItem = () => {
 renderGoods(goods);
 openModal();
 delListItem();
+checkboxControl();
+getFormData(modalForm);
+checkModalTotalPrice(modalForm);
