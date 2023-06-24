@@ -93,7 +93,11 @@ const generateId = goods => {
   }
   const generateUniqueId = () => {
     const randomId = +(Math.random().toString(10).slice(10));
-    if (!idArr.includes(randomId)) idArr.push(randomId);
+    if (!idArr.includes(randomId)) {
+      idArr.push(randomId);
+    } else {
+      generateUniqueId();
+    }
     return randomId;
   };
   return generateUniqueId;
