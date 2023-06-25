@@ -153,6 +153,11 @@ const checkImages = ({small, big}) => {
   return imageButton;
 };
 
+const calcTotalRow = (price, count, discont) => {
+  const total = (Math.ceil(price * count * (1 - discont * 0.01) * 100)) / 100;
+  return total;
+};
+
 const createTableRow = ({id, title, category, discont, units, count, price, images = {}}) => {
   const newTableRow = document.createElement('tr');
   newTableRow.classList.add('cms__table-row');
@@ -163,7 +168,7 @@ const createTableRow = ({id, title, category, discont, units, count, price, imag
   <td class="cms__table-data cms__table-data_type_unit">${units}</td>
   <td class="cms__table-data cms__table-data_type_count">${count}</td>
   <td class="cms__table-data cms__table-data_type_price">${price}</td>
-  <td class="cms__table-data cms__table-data_type_total">${price * count * (1 - discont * 0.01)}</td>
+  <td class="cms__table-data cms__table-data_type_total">${calcTotalRow(price, count, discont)}</td>
   <td class="cms__table-data cms__table-data_type_actions">
     ${checkImages(images)}
     <button class="cms__table-button cms__table-button_type_edit" type="button">
@@ -270,6 +275,7 @@ const getFormData = () => {
     e.preventDefault();
     const formData = new FormData(e.target);
     const productData = Object.fromEntries(formData);
+    if (!productData.discont) productData.discont = false;
     productData.id = +modalId.textContent;
     goods.unshift(productData);
 
