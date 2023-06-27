@@ -154,7 +154,7 @@ const checkImages = ({small, big}) => {
 };
 
 const calcTotalRow = (price, count, discont) => {
-  const total = (Math.ceil(price * count * (1 - discont * 0.01) * 100)) / 100;
+  const total = Math.ceil(price * count * (1 - discont * 0.01));
   return total;
 };
 
