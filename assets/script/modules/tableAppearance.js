@@ -44,11 +44,8 @@ const checkImages = ({small, big}) => {
     imageButton.addEventListener('click', () => {
       const newWin = open('about:blank', '', 'width=600,height=600');
 
-      const kittenImg = document.createElement('img');
-      kittenImg.setAttribute('src', imageButton.dataset.pic);
-
-      newWin.document.body.style.margin = '0';
-      newWin.document.body.append(kittenImg);
+      newWin.document.body.style.backgroundImage = `url(${imageButton.dataset.pic})`;
+      // newWin.document.body.append(kittenImg);
 
       newWin.moveTo((screen.width / 2) - 300, (screen.height / 2) - 300);
     });
