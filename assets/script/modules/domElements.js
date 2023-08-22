@@ -8,6 +8,11 @@ const btnAdd = document.querySelector('.cms__product-button');
 const modalClose = document.querySelector('.modal__close');
 const tableBody = document.querySelector('.cms__table-body');
 const mainCost = document.querySelector('.cms__total-price_content_value');
+const messageOverlay = document.querySelector('.message-overlay');
+const formMessage = document.querySelector('.form-message');
+const formMessageClose = document.querySelector('.form-message__close');
+const formMessageIcon = document.querySelector('.form-message__icon');
+const formMessageText = document.querySelector('.form-message__text');
 
 export {
   modalId,
@@ -20,4 +25,9 @@ export {
   modalClose,
   tableBody,
   mainCost,
+  messageOverlay,
+  formMessage,
+  formMessageClose,
+  formMessageIcon,
+  formMessageText,
 };

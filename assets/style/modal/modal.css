@@ -59,6 +59,45 @@
   color: var(--highlight-purple, #6d5bd0);
 }
 
+.form-message {
+  display: none;
+  overflow: hidden;
+}
+
+.form-message_active {
+  display: block;
+  overflow: visible;
+  margin: 180px auto 0 auto;
+  width: 350px;
+  height: 350px;
+  padding: 80px 20px 30px 20px;
+  font-family: Inter, Arial, sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 1.8px;
+  line-height: 100%;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--purple-text, #6e6893);
+  background-color: #f2f0f9;
+  box-shadow: 0px 0px 6px 0px rgba(0, 0, 0, 0.25);
+  position: relative;
+  z-index: 75;
+}
+
+.form-message__icon {
+  margin: 0 auto 40px auto;
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #fff;
+  border-radius: 50%;
+  border-width: 1px;
+  border-style: solid;
+}
+
 .modal__close {
   padding: 0;
   margin: 0;
@@ -88,6 +127,36 @@
   color: #4433a0;
 }
 
+.form-message__close {
+  padding: 0;
+  margin: 0;
+  position: absolute;
+  top: 26px;
+  right: 29px;
+  color: #6e6893;
+  line-height: 0;
+  border: none;
+  outline-offset: 2px;
+  outline: 1px solid transparent;
+}
+
+.form-message__close:hover > svg path {
+  stroke: #5341b5;
+}
+
+.form-message__close:focus-visible > svg path {
+  stroke: #5341b5;
+}
+
+.form-message__close:focus-visible {
+  outline: 1px solid #5341b5;
+}
+
+.form-message__close:active > svg path {
+  color: #4433a0;
+}
+
+
 @media (max-width:750px) {
   .modal{
     margin: 0 auto auto auto;
@@ -101,6 +170,10 @@
 
   .modal__total-price {
     margin: 0 0 16px 0;
+  }
+
+  .form-message_active {
+    margin: 130px auto 0 auto;
   }
 }
 
@@ -117,6 +190,10 @@
   .modal__title {
     margin: 0 0 10px 0;;
   }
+
+  .form-message_active {
+    margin: 110px auto 0 auto;
+  }
 }
 
 @media (max-width:450px) {
@@ -131,5 +208,17 @@
   .modal__close {
     right: 50%;
     transform: translate(50%, 0px);
+  }
+
+  .form-message_active {
+    margin: 100px auto 0 auto;
+    width: 300px;
+    height: 300px;
+    padding: 65px 10px 15px 10px;
+    font-size: 14px;
+  }
+
+  .form-message__icon {
+    margin: 0 auto 30px auto;
   }
 }

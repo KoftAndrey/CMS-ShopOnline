@@ -3,6 +3,35 @@ import {
   tableBody,
 } from './domElements.js';
 
+// Получить данные с сервера
+const fetchRequest = async (url, {
+  method = 'get',
+  callback,
+  body,
+  headers,
+}) => {
+  try {
+    const options = {method};
+
+    if (body) options.body = JSON.stringify(body);
+
+    if (headers) options.headers = headers;
+
+    const response = await fetch(url, options);
+
+    if (response.ok) {
+      const data = await response.json();
+      if (callback) callback(null, data);
+      return;
+    }
+
+    throw new Error(`Ошибка ${response.status}: ${response.statusText}`);
+  } catch (err) {
+    callback(err);
+  }
+};
+
+// Посчитать общую стоимость товаров таблицы
 const calculateMainTotalPrice = () => {
   let mainTotalPrice = 0;
   const allPrices = document.querySelectorAll('.cms__table-data_type_total');
@@ -12,10 +41,8 @@ const calculateMainTotalPrice = () => {
   mainCost.textContent = `₽ ${mainTotalPrice.toFixed(2)}`;
 };
 
-const calcTotalRow = (price, count, discont) => {
-  const total = Math.ceil(price * count * (1 - discont * 0.01));
-  return total;
-};
+// Посчитать общую стоимость товаров ячейки
+const calcTotalRow = (price, count, discount) => Math.ceil(price * count * (1 - discount * 0.01));
 
 const checkImages = ({small, big}) => {
   const imageButton = document.createElement('button');
@@ -53,7 +80,8 @@ const checkImages = ({small, big}) => {
   return imageButton;
 };
 
-const createTableRow = ({id, title, category, discont, units, count, price, images = {}}) => {
+// Создать ячейку товара
+const createTableRow = ({id, title, category, discount, units, count, price, images = {}}) => {
   const newTableRow = document.createElement('tr');
   newTableRow.classList.add('cms__table-row');
   newTableRow.innerHTML =
@@ -63,9 +91,8 @@ const createTableRow = ({id, title, category, discont, units, count, price, imag
     <td class="cms__table-data cms__table-data_type_unit">${units}</td>
     <td class="cms__table-data cms__table-data_type_count">${count}</td>
     <td class="cms__table-data cms__table-data_type_price">${price}</td>
-    <td class="cms__table-data cms__table-data_type_total">${calcTotalRow(price, count, discont)}</td>
+    <td class="cms__table-data cms__table-data_type_total">${calcTotalRow(price, count, discount)}</td>
     `;
-
   const imgBtn = checkImages(images);
 
   const actions = document.createElement('td');
@@ -99,10 +126,20 @@ const createTableRow = ({id, title, category, discont, units, count, price, imag
   return newTableRow;
 };
 
-const renderGoods = (arr) => {
-  const tableRowArr = arr.map(createTableRow);
-  tableBody.append(...tableRowArr);
-  calculateMainTotalPrice();
+// Рендер таблицы
+const renderGoods = () => {
+  fetchRequest('https://lapis-swift-curtain.glitch.me/api/goods', {
+    method: 'get',
+    callback(err, data) {
+      if (err) console.warn(err);
+
+      const tableRowArr = data.map(createTableRow);
+      tableBody.append(...tableRowArr);
+      calculateMainTotalPrice();
+    },
+    body: null,
+    headers: null,
+  });
 };
 
-export {calculateMainTotalPrice, createTableRow, renderGoods};
+export {fetchRequest, calculateMainTotalPrice, createTableRow, renderGoods};
