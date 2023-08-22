@@ -197,7 +197,7 @@ const sendData = (form, productData) => {
 
       renderMessageModal(200, form, data);
     },
-    body: JSON.stringify(productData),
+    body: productData,
     headers: {
       'Content-Type': 'applicatoin/json',
     },
