@@ -12,7 +12,7 @@
   "category description"
   "units count"
   "discount price"
-  ". file";
+  "error file";
   padding: 28px;
   margin: 0 0 32px 0;
   background-color: #fff;
@@ -37,6 +37,18 @@
   grid-area: discount;
 }
 
+.form__block-error {
+  grid-area: error;
+  padding-top: 20px;
+  color: #D80101;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  line-height: 17px;
+  text-transform: uppercase;
+}
+
 .form__block-description {
   grid-area: description;
 }
@@ -52,6 +64,15 @@
 .form__block-file {
   grid-area: file;
   padding: 20px 0 0 0;
+}
+
+.form__block-image {
+  max-height: 200px;
+  margin: 0 auto;
+  display: block;
+  padding: 0;
+  padding-top: 30px;
+  line-height: 0;
 }
 
 .form__label {

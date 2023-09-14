@@ -152,15 +152,22 @@ const createPriceBlock = () => {
 const createFileBlock = () => {
   const formBlockFile = document.createElement('div');
   formBlockFile.classList.add('form__block-file');
-  formBlockFile.insertAdjacentHTML('beforeend', `
-    <input class="form__input form__input_type_file" type="file" name="image-file" accept=".jpg, .jpeg">
-  `);
+
+  const formFileInput = document.createElement('input');
+  formFileInput.classList.add('form__input', 'form__input_type_file');
+  formFileInput.type = 'file';
+  formFileInput.name = 'image-file';
+  formFileInput.setAttribute('accept', '.jpg, .jpeg');
+
+  formBlockFile.append(formFileInput);
+
+  formBlockFile.file = formFileInput;
 
   return formBlockFile;
 };
 
 // Bottom block
-const createBottomBlock = () => {
+const createBottomBlock = (id) => {
   const modalBlockBottom = document.createElement('div');
   modalBlockBottom.classList.add('modal__block-bottom');
 
@@ -176,7 +183,7 @@ const createBottomBlock = () => {
 
   modalBlockBottom.append(modalTotalPrice);
   modalBlockBottom.insertAdjacentHTML('beforeend', `
-    <button class="form__button" type="submit">Добавить товар</button>
+    <button class="form__button" type="submit">${id ? 'Изменить товар' : 'Добавить товар'}</button>
   `);
 
   modalBlockBottom.priceValue = modalTotalPriceValue;
@@ -184,7 +191,7 @@ const createBottomBlock = () => {
   return modalBlockBottom;
 };
 
-const createModalForm = () => {
+const createModalForm = (id) => {
   // Form
   const modalForm = createForm();
   // Fieldset
@@ -207,7 +214,7 @@ const createModalForm = () => {
   // File
   const formBlockFile = createFileBlock();
   // Bottom block
-  const modalBlockBottom = createBottomBlock();
+  const modalBlockBottom = createBottomBlock(id);
 
   formFieldset.append(
       formBlockName,
@@ -222,6 +229,8 @@ const createModalForm = () => {
 
   modalForm.append(formFieldset, modalBlockBottom);
 
+  modalForm.blockDiscount = formBlockDiscount;
+
   return {
     modalForm,
     checkbox: formBlockDiscount.checkbox,
@@ -229,6 +238,7 @@ const createModalForm = () => {
     count: formBlockCount.count,
     price: formBlockPrice.price,
     priceValue: modalBlockBottom.priceValue,
+    file: formBlockFile.file,
   };
 };
 

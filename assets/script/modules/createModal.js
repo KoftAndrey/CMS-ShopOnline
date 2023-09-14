@@ -45,6 +45,7 @@ const showModal = async (id) => {
     count,
     price,
     priceValue,
+    file,
   } = createModalForm(id);
   modalBlockTop.append(modalTitle);
 
@@ -68,6 +69,7 @@ const showModal = async (id) => {
       count,
       price,
       priceValue,
+      file,
   );
 
   modal.append(modalBlockTop, closeBtn, modalForm);

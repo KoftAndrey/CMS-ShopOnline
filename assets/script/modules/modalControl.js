@@ -8,6 +8,20 @@ import {
   createTableRow,
 } from './tableAppearance.js';
 
+// Конвертация в формат Base64
+const toBase64 = file => new Promise((resolve, reject) => {
+  const reader = new FileReader();
+
+  reader.addEventListener('loadend', () => {
+    resolve(reader.result);
+  });
+  reader.addEventListener('error', err => {
+    reject(err);
+  });
+
+  reader.readAsDataURL(file);
+});
+
 // Функционал checkbox
 const checkboxControl = (checkbox, input) => {
   checkbox.addEventListener('click', () => {
@@ -60,6 +74,47 @@ const checkModalTotalPrice = (input, count, price, cost) => {
   });
 };
 
+// Отобразить картинку
+const createImageElem = form => {
+  const imgElem = document.createElement('img');
+  imgElem.classList.add('form__block-image');
+
+  form.append(imgElem);
+
+  return imgElem;
+};
+
+// Отобразить ошибку размера файла
+const showImageError = form => {
+  const imageErrorBlock = document.createElement('div');
+  imageErrorBlock.classList.add('form__block-error');
+
+  const imageErrorElem = document.createElement('div');
+  imageErrorElem.classList.add('form__file-error');
+  imageErrorElem.textContent = 'Изображение не должно превышать размер 1 Мб';
+
+  imageErrorBlock.append(imageErrorElem);
+
+  form.blockDiscount.after(imageErrorBlock);
+};
+
+// Отображение файла в форме
+const showImagePreview = (form, fileInput) => {
+  fileInput.addEventListener('change', () => {
+    if (fileInput.files.length > 0) {
+      if (fileInput.files[0].size > 1048576) {
+        showImageError(form);
+      } else {
+        const src = URL.createObjectURL(fileInput.files[0]);
+
+        const imgElem = createImageElem(form);
+        imgElem.style.display = 'block';
+        imgElem.src = src;
+      }
+    }
+  });
+};
+
 // Действия после закрытия окна сообщения
 const afterMessageActions = (overlay, status, data) => {
   overlay.remove();
@@ -103,9 +158,11 @@ const modalControl = (
     count,
     price,
     cost,
+    file,
 ) => {
   checkboxControl(checkbox, input);
   checkModalTotalPrice(input, count, price, cost);
+  showImagePreview(form, file);
 
   overlay.addEventListener('click', ({target}) => {
     if (target === overlay || target.classList.contains('modal__close')) {
@@ -117,10 +174,11 @@ const modalControl = (
     overlay.remove();
   });
 
-  form.addEventListener('submit', e => {
+  form.addEventListener('submit', async e => {
     e.preventDefault();
     const formData = new FormData(e.target);
     const productData = Object.fromEntries(formData);
+    productData.image = await toBase64(productData.image);
 
     sendData(overlay, productData);
   });
