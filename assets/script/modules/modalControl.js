@@ -16,6 +16,7 @@ const toBase64 = file => new Promise((resolve, reject) => {
     resolve(reader.result);
   });
   reader.addEventListener('error', err => {
+    console.warn('Ошибка при загрузке изображения');
     reject(err);
   });
 

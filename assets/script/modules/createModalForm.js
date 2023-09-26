@@ -1,3 +1,17 @@
+// Проверка ввода текста
+const checkTextInput = input => {
+  input.addEventListener('input', () => {
+    input.value = input.value.replace(/[^а-яА-ЯёЁ ]/g, '');
+  });
+};
+
+// Проверка ввода цифр
+const checkIntegerInput = input => {
+  input.addEventListener('input', () => {
+    input.value = input.value.replace(/[^0-9]/g, '');
+  });
+};
+
 // Close btn
 const createCloseBtn = () => {
   const closeBtn = document.createElement('button');
@@ -29,8 +43,17 @@ const createNameBlock = () => {
   formBlockName.classList.add('form__block-name');
   formBlockName.insertAdjacentHTML('beforeend', `
     <label class="form__label" for="name">Наименование</label>
-    <input class="form__input" type="text" name="title" id="name" required>
   `);
+
+  const input = document.createElement('input');
+  input.classList.add('form__input');
+  input.setAttribute('type', 'text');
+  input.setAttribute('name', 'title');
+  input.setAttribute('id', 'name');
+  input.setAttribute('required', '');
+  checkTextInput(input);
+
+  formBlockName.append(input);
 
   return formBlockName;
 };
@@ -41,8 +64,17 @@ const createCategoryBlock = () => {
   formBlockCategory.classList.add('form__block-category');
   formBlockCategory.insertAdjacentHTML('beforeend', `
     <label class="form__label" for="category">Категория</label>
-    <input class="form__input" type="text" name="category" id="category" required>
   `);
+
+  const input = document.createElement('input');
+  input.classList.add('form__input');
+  input.setAttribute('type', 'text');
+  input.setAttribute('name', 'category');
+  input.setAttribute('id', 'category');
+  input.setAttribute('required', '');
+  checkTextInput(input);
+
+  formBlockCategory.append(input);
 
   return formBlockCategory;
 };
@@ -53,8 +85,19 @@ const createUnitsBlock = () => {
   formBlockUnits.classList.add('form__block-units');
   formBlockUnits.insertAdjacentHTML('beforeend', `
     <label class="form__label" for="units">Единицы измерения</label>
-    <input class="form__input" type="text" name="units" id="units" required>
   `);
+
+  const input = document.createElement('input');
+  input.classList.add('form__input');
+  input.setAttribute('type', 'text');
+  input.setAttribute('name', 'units');
+  input.setAttribute('id', 'units');
+  input.setAttribute('required', '');
+  input.addEventListener('input', () => {
+    input.value = input.value.replace(/^[А-Я]Ё/gi, '');
+  });
+
+  formBlockUnits.append(input);
 
   return formBlockUnits;
 };
@@ -84,6 +127,7 @@ const createDiscountBlock = () => {
   discontInput.setAttribute('max', '99');
   discontInput.setAttribute('required', '');
   discontInput.setAttribute('disabled', '');
+  checkIntegerInput(discontInput);
 
   checkboxContainer.append(formCheckbox, discontInput);
   formBlockDiscount.append(checkboxContainer);
@@ -100,8 +144,18 @@ const createDescriptionBlock = () => {
   formBlockDescription.classList.add('form__block-description');
   formBlockDescription.insertAdjacentHTML('beforeend', `
     <label class="form__label" for="description">Описание</label>
-    <textarea class="form__input form__input_type_textarea" name="description" id="description" rows="5" required></textarea>
   `);
+
+  const textarea = document.createElement('textarea');
+  textarea.classList.add('form__input', 'form__input_type_textarea');
+  textarea.setAttribute('name', 'description');
+  textarea.setAttribute('id', 'description');
+  textarea.setAttribute('rows', '5');
+  textarea.setAttribute('minlength', '80');
+  textarea.setAttribute('required', '');
+  checkTextInput(textarea);
+
+  formBlockDescription.append(textarea);
 
   return formBlockDescription;
 };
@@ -120,6 +174,7 @@ const createCountBlock = () => {
   formCount.id = 'count';
   formCount.setAttribute('min', '0');
   formCount.setAttribute('required', '');
+  checkIntegerInput(formCount);
 
   formBlockCount.append(formCount);
 
@@ -140,6 +195,7 @@ const createPriceBlock = () => {
   formPrice.id = 'price';
   formPrice.setAttribute('min', '0');
   formPrice.setAttribute('required', '');
+  checkIntegerInput(formPrice);
 
   formBlockPrice.append(formPrice);
 
