@@ -15,9 +15,9 @@ const toBase64 = file => new Promise((resolve, reject) => {
   reader.addEventListener('loadend', () => {
     resolve(reader.result);
   });
-  reader.addEventListener('error', err => {
+  reader.addEventListener('error', () => {
     console.warn('Ошибка при загрузке изображения');
-    reject(err);
+    reject(reader.error);
   });
 
   reader.readAsDataURL(file);
@@ -179,7 +179,11 @@ const modalControl = (
     e.preventDefault();
     const formData = new FormData(e.target);
     const productData = Object.fromEntries(formData);
-    productData.image = await toBase64(productData.image);
+    console.log('Product data:', productData);
+
+    if (productData.image) {
+      productData.image = await toBase64(productData.image);
+    }
 
     sendData(overlay, productData);
   });
