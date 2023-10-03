@@ -179,7 +179,6 @@ const modalControl = (
     e.preventDefault();
     const formData = new FormData(e.target);
     const productData = Object.fromEntries(formData);
-    console.log('Product data:', productData);
 
     if (productData.image) {
       productData.image = await toBase64(productData.image);
