@@ -1,3 +1,5 @@
+import {fetchRequest} from './fetchRequest.js';
+
 // Проверка ввода текста
 const checkTextInput = input => {
   input.addEventListener('input', () => {
@@ -59,6 +61,25 @@ const createNameBlock = () => {
 };
 
 // Category
+const createCategorieslist = (datalist) => {
+  const categories = fetchRequest('http://localhost:3000/api/categories', {
+    method: 'GET',
+    callback(err, data) {
+      if (err) console.warn(err);
+
+      const categoriesOptions = data.map(category => {
+        const categoryNode = document.createElement('option');
+        categoryNode.value = category;
+        return categoryNode;
+      });
+
+      datalist.append(...categoriesOptions);
+    },
+    body: null,
+    headers: null,
+  });
+};
+
 const createCategoryBlock = () => {
   const formBlockCategory = document.createElement('div');
   formBlockCategory.classList.add('form__block-category');
@@ -71,10 +92,20 @@ const createCategoryBlock = () => {
   input.setAttribute('type', 'text');
   input.setAttribute('name', 'category');
   input.setAttribute('id', 'category');
+  input.setAttribute('list', 'category-list');
   input.setAttribute('required', '');
   checkTextInput(input);
 
-  formBlockCategory.append(input);
+  const datalistWrapper = document.createElement('div');
+  datalistWrapper.classList.add('form__datalist-wrapper');
+
+  const datalist = document.createElement('datalist');
+  datalist.setAttribute('id', 'category-list');
+
+  datalistWrapper.append(datalist);
+  formBlockCategory.append(input, datalistWrapper);
+
+  formBlockCategory.datalist = datalist;
 
   return formBlockCategory;
 };
@@ -121,7 +152,7 @@ const createDiscountBlock = () => {
   const discontInput = document.createElement('input');
   discontInput.classList.add('form__input');
   discontInput.type = 'number';
-  discontInput.name = 'discont';
+  discontInput.name = 'discount';
   discontInput.id = 'discount';
   discontInput.setAttribute('min', '0');
   discontInput.setAttribute('max', '99');
@@ -212,7 +243,8 @@ const createFileBlock = () => {
   const formFileInput = document.createElement('input');
   formFileInput.classList.add('form__input', 'form__input_type_file');
   formFileInput.type = 'file';
-  formFileInput.name = 'image-file';
+  formFileInput.name = 'image';
+  formFileInput.multiple = false;
   formFileInput.setAttribute('accept', '.jpg, .jpeg');
 
   formBlockFile.append(formFileInput);
@@ -289,6 +321,7 @@ const createModalForm = (id) => {
 
   return {
     modalForm,
+    datalist: formBlockCategory.datalist,
     checkbox: formBlockDiscount.checkbox,
     input: formBlockDiscount.input,
     count: formBlockCount.count,
@@ -298,4 +331,4 @@ const createModalForm = (id) => {
   };
 };
 
-export {createCloseBtn, createModalForm};
+export {createCloseBtn, createModalForm, createCategorieslist};

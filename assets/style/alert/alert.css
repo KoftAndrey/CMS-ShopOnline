@@ -1,0 +1,41 @@
+.alert {
+
+}
+
+.alert__text {
+
+}
+
+.alert__buttons-block {
+  display: flex;
+}
+
+.alert__button {
+  padding: 10px;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 20px;
+}
+
+.alert__button_type_delete {
+  color: #fff;
+  background-color: var(--alert-red, #d80101);
+  border: transparent;
+  transition: background-color .2s ease;
+}
+
+.alert__button_type_delete:hover {
+  background-color: #b10d0d;
+}
+
+.alert__button_type_reject {
+  color: var(--main-text, #25213b);
+  border-width: 1px;
+  border-style: solid;
+  border-color: #c6c2de;
+  transition: border-color .2s ease;
+}
+
+.alert__button_type_reject:hover {
+  border-color:#5341b5;
+}

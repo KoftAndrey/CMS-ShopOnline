@@ -1,0 +1,34 @@
+@keyframes barAnim {
+  0% {
+    left: 0;
+    transform: translateX(-100%);
+  }
+  100% {
+    left: 100%;
+    transform: translateX(0%);
+  }
+}
+
+.bar-active{
+  animation: barAnim 3.8s linear infinite;
+  background-color: var(--purple-text, #6e6893);
+}
+
+/*
+@keyframes barWidth {
+    0%   {width: 0%;}
+    25%  {width: 50%;}
+    50%  {width: 100%;}
+    75%  {width: 50%;}
+    100% {width: 0%;}
+}
+
+.bar-active{
+  animation: barWidth;
+  animation-duration: 2.5s;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+  animation-delay: 0s;
+  background: var(--purple-text, #6e6893);
+}
+*/

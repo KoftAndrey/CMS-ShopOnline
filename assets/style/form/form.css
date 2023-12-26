@@ -67,12 +67,57 @@
 }
 
 .form__block-image {
-  max-height: 200px;
+  display: inline-block;
+  margin-top: 30px;
+  position: relative;
+}
+
+.form__block-image::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, .0);
+  transition: background-color .2s ease;
+}
+
+.form__block-image:hover::after{
+  background-color: rgba(0, 0, 0, .5);
+}
+
+.form__image-delete {
+  opacity: 0;
+  position: absolute;
+  transform: translate(-50%, 50%);
+  left: 50%;
+  bottom: 50%;
+  z-index: 5;
+  width: 58px;
+  height: 58px;
+  border-radius: 29px;
+  border:  none;
+  background-color: rgba(255, 255, 255, .4);
+  color: #fff;
+  transition: opacity, background-color, color .2s ease;
+}
+
+.form__image-delete:hover {
+  background-color: rgba(255, 255, 255, 1);
+  color: var(--highlight-purple, #6d5bd0);
+}
+
+.form__block-image:hover > .form__image-delete {
+  opacity: 1;
+}
+
+.form__image {
+  max-height: 240px;
   margin: 0 auto;
   display: block;
-  padding: 0;
-  padding-top: 30px;
   line-height: 0;
+  padding: 0;
 }
 
 .form__label {
@@ -104,6 +149,35 @@
 
 .form__input[disabled] {
   background-color: #eee;
+}
+
+.form__datalist-wrapper {
+  position: relative;
+}
+
+.form__datalist-wrapper::after {
+  content: '';
+  display: block;
+  position: absolute;
+  top: -25px;
+  right: 12px;
+  width: 12px;
+  height: 12px;
+  background: url('./img/datalist-arrow.svg') center no-repeat;
+  opacity: 0;
+}
+
+.form__input[list="category-list"]:hover {
+ cursor: pointer;
+}
+
+.form__input[list="category-list"]:hover + .form__datalist-wrapper::after,
+.form__input[list="category-list"]:focus + .form__datalist-wrapper::after {
+ opacity: 1;
+}
+
+.form__input[list="category-list"]::-webkit-calendar-picker-indicator {
+  display: none !important;
 }
 
 .form__input_type_file {
@@ -234,6 +308,90 @@
 .form__button:active {
   background: #4433a0;
 }
+
+.form__alert-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0, 0.7);
+  z-index: 50;
+}
+
+.form__alert {
+  padding: 30px 30px 34px 30px;
+  position: absolute;
+  top: 48px;
+  left: 50%;
+  transform: translate(-50%, 0px);
+  max-width: 436px;
+  border: none;
+  border-radius: 8px;
+  background-color: #fff;
+  box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.25);
+}
+
+.form__alert-btn {
+  padding-bottom: 0px;
+  padding-bottom: 5px;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 20px;
+  text-transform: uppercase;
+  background: transparent;
+  border: none;
+  border-top-color: transparent;
+  border-right-color: transparent;
+  border-bottom-color: transparent;
+  border-left-color: transparent;
+  position: relative;
+}
+
+.form__alert-btn::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0%;
+  height: 2px;
+  transition: width .2s ease;
+}
+
+.form__alert-btn:hover::after {
+  width: 100%;
+}
+
+.form__alert-btn_type_cancel {
+  color: var(--highlight-purple, #6d5bd0);
+}
+
+.form__alert-btn_type_cancel::after {
+  background-color: var(--highlight-purple, #6d5bd0);
+}
+
+.form__alert-btn_type_delete {
+  margin: 0 30px 0 0;
+  color: var(--alert-red, #d80101);
+}
+
+.form__alert-btn_type_delete::after {
+  background-color: var(--alert-red, #d80101);
+}
+
+.form__alert-text {
+  margin: 0 0 30px 0;
+}
+
+.form__alert-text_style_normal {
+  line-height: 1.35;
+}
+
+.form__alert-text_style_accent {
+  color: var(--highlight-purple, #6d5bd0);
+  font-weight: 600;
+}
+
 
 @media (max-width:750px) {
   .form__fieldset {

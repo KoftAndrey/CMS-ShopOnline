@@ -1,6 +1,6 @@
 // Создать сообщение об успешной отправке
-const createSuccessMessage = (text, icon) => {
-  text.textContent = 'Товар успешно добавлен';
+const createSuccessMessage = (text, icon, edit) => {
+  text.textContent = edit ? 'Товар успешно изменен' : 'Товар успешно добавлен';
   icon.insertAdjacentHTML('beforeend', `
     <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="bi bi-check-lg" viewBox="0 0 16 16">
       <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022Z"/>
@@ -35,14 +35,14 @@ const createWrongMessage = (text, icon) => {
 };
 
 // Выбрать тип сообщения
-const setMessageType = (text, icon, status) => {
+const setMessageType = (text, icon, status, edit) => {
   switch (true) {
     case status >= 500:
       return createWrongMessage(text, icon);
     case status >= 400:
       return createErrorMessage(text, icon, status);
     default:
-      return createSuccessMessage(text, icon);
+      return createSuccessMessage(text, icon, edit);
   }
 };
 
@@ -56,7 +56,7 @@ const messageModalControl = (overlay, closeBtn, closeFunc) => {
 };
 
 // Отобразить сообщение
-const showFormMessage = (overlay, status, closeFunc) => {
+const showFormMessage = (edit, overlay, status, closeFunc) => {
   const messageOverlay = document.createElement('div');
   messageOverlay.classList.add('message-overlay', 'message-overlay_visible');
 
@@ -79,7 +79,7 @@ const showFormMessage = (overlay, status, closeFunc) => {
   const formMessageText = document.createElement('p');
   formMessageText.classList.add('form-message__text');
 
-  setMessageType(formMessageText, formMessageIcon, status);
+  setMessageType(formMessageText, formMessageIcon, status, edit);
 
   formMessage.append(formMessageClose, formMessageIcon, formMessageText);
   messageOverlay.append(formMessage);

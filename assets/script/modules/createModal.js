@@ -1,19 +1,28 @@
-import {createCloseBtn, createModalForm} from './createModalForm.js';
+import {
+  createCloseBtn,
+  createModalForm,
+  createCategorieslist,
+} from './createModalForm.js';
 
-import {tableWrapper, btnAdd} from './domElements.js';
-import {modalControl, setModalTotalPrice} from './modalControl.js';
+import {tableWrapper} from './domElements.js';
+import {
+  modalControl,
+  setModalTotalPrice,
+  displayImage,
+} from './modalControl.js';
 import loadStyle from './loadStyle.js';
-import {fetchRequest} from './tableAppearance.js';
+import {fetchRequest} from './fetchRequest.js';
 
+// Заполнение полей формы из свойств объекта
 const fillFormFields = (obj, property, form) => {
-  if (property !== 'id' && property !== 'image' && obj[property]) {
-    if (property === 'discount') {
-      form.checkbox.checked = true;
-      form.discount.disabled = false;
-      form.discount.value = obj.discount;
-    } else {
-      form[property].value = obj[property];
-    }
+  if (property !== 'discount' && property !== 'id' && property !== 'image' && obj[property]) {
+    form[property].value = obj[property];
+  }
+
+  if (property === 'discount' && obj[property] !== 0 && obj[property] !== '0') {
+    form.checkbox.checked = true;
+    form.discount.disabled = false;
+    form.discount.value = obj.discount;
   }
 };
 
@@ -40,6 +49,7 @@ const showModal = async (id) => {
   // Form
   const {
     modalForm,
+    datalist,
     checkbox,
     input,
     count,
@@ -47,6 +57,9 @@ const showModal = async (id) => {
     priceValue,
     file,
   } = createModalForm(id);
+
+  createCategorieslist(datalist);
+
   modalBlockTop.append(modalTitle);
 
   // ID
@@ -57,6 +70,31 @@ const showModal = async (id) => {
     id: <span class="modal__id_content_value">${id}</span>
   `);
     modalBlockTop.append(modalId);
+  }
+
+  // Загрузка данных в форму редактирования
+  if (id) {
+    fetchRequest(`http://localhost:3000/api/goods/${id}`, {
+      method: 'GET',
+      callback(err, data) {
+        if (err) console.warn(err);
+
+        const properties = Object.keys(data);
+        properties.forEach(property => {
+          fillFormFields(data, property, modalForm);
+        });
+
+        if (data.image !== 'image/notimage.jpg') {
+          file.setAttribute('data-src', data.image);
+        }
+
+        displayImage(`./cms-backend/${data.image}`, file);
+
+        setModalTotalPrice(priceValue, count, price, modalForm.discount);
+      },
+      body: null,
+      headers: null,
+    });
   }
 
   // Управление окном
@@ -70,33 +108,17 @@ const showModal = async (id) => {
       price,
       priceValue,
       file,
+      id,
   );
 
   modal.append(modalBlockTop, closeBtn, modalForm);
   overlay.append(modal);
   tableWrapper.append(overlay);
-
-  // Загрузка данных в форму редактирования
-  if (id) {
-    fetchRequest(`https://lapis-swift-curtain.glitch.me/api/goods/${id}`, {
-      method: 'get',
-      callback(err, data) {
-        if (err) console.warn(err);
-        const properties = Object.keys(data);
-        properties.forEach(property => {
-          fillFormFields(data, property, modalForm);
-        });
-        setModalTotalPrice(priceValue, count, price, modalForm.discount);
-      },
-      body: null,
-      headers: null,
-    });
-  }
 };
 
 // Открыть модальное окно
-const openModal = () => {
-  btnAdd.addEventListener('click', () => {
+const openModal = (btn) => {
+  btn.addEventListener('click', () => {
     showModal(null);
   });
 };

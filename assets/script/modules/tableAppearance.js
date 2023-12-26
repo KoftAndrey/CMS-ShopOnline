@@ -1,57 +1,43 @@
 import {
+  cmsSection,
   mainCost,
-  tableBody,
 } from './domElements.js';
 
+import {
+  startLoader,
+  stopLoader,
+} from './loader.js';
+
+import {delItem} from './tableControl.js';
+import {fetchRequest} from './fetchRequest.js';
+import {createTable} from './createTable.js';
 import {openEditModal} from './createModal.js';
-
-// Получить данные с сервера
-const fetchRequest = async (url, {
-  method = 'get',
-  callback,
-  body,
-  headers,
-}) => {
-  try {
-    const options = {method};
-
-    if (body) options.body = JSON.stringify(body);
-
-    if (headers) options.headers = headers;
-
-    const response = await fetch(url, options);
-
-    if (response.ok) {
-      const data = await response.json();
-      if (callback) callback(null, data);
-      return;
-    }
-
-    throw new Error(`Ошибка ${response.status}: ${response.statusText}`);
-  } catch (err) {
-    callback(err);
-  }
-};
 
 // Посчитать общую стоимость товаров таблицы
 const calculateMainTotalPrice = () => {
-  let mainTotalPrice = 0;
-  const allPrices = document.querySelectorAll('.cms__table-data_type_total');
-  for (const price of allPrices) {
-    mainTotalPrice += +price.textContent;
-  }
-  mainCost.textContent = `₽ ${mainTotalPrice.toFixed(2)}`;
+  fetchRequest(`http://localhost:3000/api/total`, {
+    method: 'GET',
+    callback(err, data) {
+      if (err) console.warn(err);
+
+      console.log('total: ', data);
+      mainCost.textContent = `₽ ${data.toFixed(2)}`;
+    },
+    body: null,
+    headers: null,
+  });
 };
 
 // Посчитать общую стоимость товаров ячейки
 const calcTotalRow = (price, count, discount) => Math.ceil(price * count * (1 - discount * 0.01));
 
-const checkImages = ({small, big}) => {
+// Проверить наличие изображения товара
+const checkImages = (image) => {
   const imageButton = document.createElement('button');
   imageButton.type = 'button';
   imageButton.classList.add('cms__table-button');
 
-  if (!small || !big) {
+  if (!image || image.includes('notimage')) {
     imageButton.classList.add('cms__table-button_type_image-not-uploaded');
     imageButton.insertAdjacentHTML('beforeend', `
       <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -61,7 +47,7 @@ const checkImages = ({small, big}) => {
     `);
   } else {
     imageButton.classList.add('cms__table-button_type_image-uploaded');
-    imageButton.setAttribute('data-pic', 'https://cdn-images-1.listennotes.com/podcasts/terror-tuness-posts-terror-tunes-gwYkG_TZJtV.600x600.jpg');
+    imageButton.setAttribute('data-pic', `${image}`);
     imageButton.insertAdjacentHTML('beforeend', `
       <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
         <path d="M17.7778 2.22223H2.22223C1.92754 2.22223 1.64493 2.33929 1.43655 2.54767C1.22818 2.75604 1.11111 3.03866 1.11111 3.33334V16.6667C1.11111 16.9614 1.22818 17.244 1.43655 17.4523C1.64493 17.6607 1.92754 17.7778 2.22223 17.7778H17.7778C18.0725 17.7778 18.3551 17.6607 18.5635 17.4523C18.7718 17.244 18.8889 16.9614 18.8889 16.6667V3.33334C18.8889 3.03866 18.7718 2.75604 18.5635 2.54767C18.3551 2.33929 18.0725 2.22223 17.7778 2.22223ZM2.22223 16.6667V3.33334H17.7778V16.6667H2.22223Z"/>
@@ -71,19 +57,61 @@ const checkImages = ({small, big}) => {
     `);
 
     imageButton.addEventListener('click', () => {
-      const newWin = open('about:blank', '', 'width=600,height=600');
+      const newWin = open();
 
-      newWin.document.body.style.backgroundImage = `url(${imageButton.dataset.pic})`;
-
-      newWin.moveTo((screen.width / 2) - 300, (screen.height / 2) - 300);
+      newWin.document.body.style.backgroundImage = `url('./cms-backend/${imageButton.dataset.pic}')`;
+      newWin.document.body.style.backgroundRepeat = 'no-repeat';
+      newWin.document.body.style.backgroundPosition = 'center';
     });
   }
 
   return imageButton;
 };
 
+// Модальное окно-alert при удалении товара
+const crerateDeleteAlert = (row) => {
+  const alertWrapper = document.createElement('div');
+  alertWrapper.classList.add('form__alert-wrapper');
+
+  const alertBlock = document.createElement('div');
+  alertBlock.classList.add('form__alert');
+
+  const alertCancelBtn = document.createElement('button');
+  alertCancelBtn.classList.add(
+      'form__alert-btn',
+      'form__alert-btn_type_cancel',
+  );
+  alertCancelBtn.type = 'button';
+  alertCancelBtn.textContent = 'Оставить';
+
+  const alertDelBtn = document.createElement('button');
+  alertDelBtn.classList.add('form__alert-btn', 'form__alert-btn_type_delete');
+  alertDelBtn.type = 'button';
+  alertDelBtn.textContent = 'Удалить';
+
+  alertBlock.append(alertDelBtn, alertCancelBtn);
+  alertBlock.insertAdjacentHTML('afterbegin', `
+    <p class="form__alert-text form__alert-text_style_normal">Удалить ${row.cells[4].innerText} ${row.cells[3].innerText} товара <span class="form__alert-text form__alert-text_style_accent">${row.cells[1].innerText}</span> стоимостью ₽${row.cells[6].innerText}?</p>
+  `);
+
+  alertWrapper.addEventListener('click', ({target}) => {
+    if (target === alertWrapper ||
+      target.classList.contains('form__alert-btn_type_cancel')) {
+      alertWrapper.remove();
+    }
+  });
+
+  alertDelBtn.addEventListener('click', () => {
+    alertWrapper.remove();
+    delItem(row, row.cells[0].innerText);
+  });
+
+  alertWrapper.append(alertBlock);
+  document.body.prepend(alertWrapper);
+};
+
 // Создать ячейку товара
-const createTableRow = ({id, title, category, discount, units, count, price, images = {}}) => {
+const createTableRow = ({id, title, category, discount, units, count, price, image = undefined}) => {
   const newTableRow = document.createElement('tr');
   newTableRow.classList.add('cms__table-row');
   newTableRow.innerHTML =
@@ -95,7 +123,8 @@ const createTableRow = ({id, title, category, discount, units, count, price, ima
     <td class="cms__table-data cms__table-data_type_price">${price}</td>
     <td class="cms__table-data cms__table-data_type_total">${calcTotalRow(price, count, discount)}</td>
     `;
-  const imgBtn = checkImages(images);
+
+  const imgBtn = checkImages(image);
 
   const actions = document.createElement('td');
   actions.classList.add('cms__table-data', 'cms__table-data_type_actions');
@@ -130,21 +159,37 @@ const createTableRow = ({id, title, category, discount, units, count, price, ima
   `);
 
   newTableRow.append(actions);
-
   openEditModal(editBtn);
-
   return newTableRow;
 };
 
 // Рендер таблицы
-const renderGoods = () => {
-  fetchRequest('https://lapis-swift-curtain.glitch.me/api/goods', {
-    method: 'get',
+const renderGoods = (page = undefined) => {
+  startLoader();
+  fetchRequest(`http://localhost:3000/api/goods${page ? ('?page=' + page) : ''}`, {
+    method: 'GET',
     callback(err, data) {
-      if (err) console.warn(err);
+      if (err) {
+        console.warn(err);
+        stopLoader();
+      }
+console.log('data: ', data);
 
-      const tableRowArr = data.map(createTableRow);
-      tableBody.append(...tableRowArr);
+      const currentTable = document.querySelector('.cms__main');
+      if (currentTable) currentTable.remove();
+
+      const table = createTable(
+          data.totalCount,
+          data.page,
+          data.pages,
+      );
+
+      const tableRowArr = data.goods.map(createTableRow);
+
+      table.tableBody.prepend(...tableRowArr);
+      cmsSection.append(table);
+
+      stopLoader();
       calculateMainTotalPrice();
     },
     body: null,
@@ -152,4 +197,9 @@ const renderGoods = () => {
   });
 };
 
-export {fetchRequest, calculateMainTotalPrice, createTableRow, renderGoods};
+export {
+  calculateMainTotalPrice,
+  crerateDeleteAlert,
+  createTableRow,
+  renderGoods,
+};
