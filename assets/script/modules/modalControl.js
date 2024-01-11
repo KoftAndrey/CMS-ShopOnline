@@ -142,7 +142,9 @@ const createImageBlock = (fieldset) => {
 const displayImage = (src, title, fileInput, fieldset) => {
   if (src.includes('notimage')) {
     return;
-  } else if (!src.includes('jpg') && !src.includes('jpeg')) {
+  } else if (!src.includes('jpg') &&
+    !src.includes('jpeg') &&
+    !src.includes('blob')) {
     console.warn('Неверный формат изображения');
 
     const imgBlock = document.createElement('div');
@@ -195,7 +197,7 @@ const sendData = (edit, id = null, method, overlay, productData, page) => {
         });
         return;
       }
-      console.log('modal data: ', data);
+
       showFormMessage(edit, overlay, 200, () => {
         afterMessageActions(overlay, 200, page);
       });
