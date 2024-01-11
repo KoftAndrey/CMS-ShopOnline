@@ -61,10 +61,7 @@ const createSearchForm = () => {
 };
 
 // создать верхний блок с действиями
-const createActionsBlock = () => {
-  const actionsBlock = document.createElement('div');
-  actionsBlock.classList.add('cms__actions');
-
+const createActionsBlock = (actions, page) => {
   const filterBtn = createFilterBtn();
   const searchForm = createSearchForm();
 
@@ -72,45 +69,26 @@ const createActionsBlock = () => {
   addProductBtn.type = 'button';
   addProductBtn.classList.add('cms__product-button');
   addProductBtn.textContent = 'Добавить товар';
-  openModal(addProductBtn);
+  openModal(addProductBtn, page);
 
-  actionsBlock.append(filterBtn, searchForm, addProductBtn);
-
-  return actionsBlock;
+  actions.append(filterBtn, searchForm, addProductBtn);
 };
 
 // создать разметку таблицы
-const createTableBox = () => {
-  const tableBox = document.createElement('div');
-  tableBox.classList.add('cms__table-box');
+const createTableBox = (thead, tbody, page) => {
+  thead.innerHTML = `
+    <tr>
+      <th class="cms__table-th cms__table-th_type_id">Id</th>
+      <th class="cms__table-th cms__table-th_type_name">Наименование</th>
+      <th class="cms__table-th cms__table-th_type_category">Категория</th>
+      <th class="cms__table-th cms__table-th_type_unit">ед/изм</th>
+      <th class="cms__table-th cms__table-th_type_count">Количество</th>
+      <th class="cms__table-th cms__table-th_type_price">Цена</th>
+      <th class="cms__table-th cms__table-th_type_total">Итог</th>
+    </tr>
+  `;
 
-  const table = document.createElement('table');
-  table.classList.add('cms__table');
-  table.insertAdjacentHTML('beforeend', `
-    <thead class="cms__table-head">
-      <tr>
-        <th class="cms__table-th cms__table-th_type_id">Id</th>
-        <th class="cms__table-th cms__table-th_type_name">Наименование</th>
-        <th class="cms__table-th cms__table-th_type_category">Категория</th>
-        <th class="cms__table-th cms__table-th_type_unit">ед/изм</th>
-        <th class="cms__table-th cms__table-th_type_count">Количество</th>
-        <th class="cms__table-th cms__table-th_type_price">Цена</th>
-        <th class="cms__table-th cms__table-th_type_total">Итог</th>
-      </tr>
-    </thead>
-  `);
-
-  const tableBody = document.createElement('tbody');
-  tableBody.classList.add('cms__table-body');
-  delListItem(tableBody);
-
-  table.append(tableBody);
-
-  tableBox.append(table);
-
-  tableBox.tableBody = tableBody;
-
-  return tableBox;
+  delListItem(tbody, page);
 };
 
 // создать нижний блок с действиями
@@ -158,10 +136,8 @@ const createFooterActions = (page, totalPages) => {
 };
 
 // создать footer
-const createTableFooter = (totalCount, page, totalPages) => {
-  const tableFooter = document.createElement('div');
-  tableFooter.classList.add('cms__table-footer');
-  tableFooter.insertAdjacentHTML('beforeend', `
+const fillTableFooter = (footer, totalCount, page, totalPages) => {
+  footer.insertAdjacentHTML('beforeend', `
     <div class="cms__shown-controller">
       <label class="cms__shown-label" for="shown-select">Показывать на странице:</label>
       <select class="cms__shown-list" name="items-to-show" id="shown-select">
@@ -178,28 +154,69 @@ const createTableFooter = (totalCount, page, totalPages) => {
 
   const footerActions = createFooterActions(page, totalPages);
 
-  tableFooter.append(footerActions);
-
-  return tableFooter;
+  footer.append(footerActions);
 };
 
-const createTable = (totalCount, page, totalPages) => {
+// каркас таблицы
+const crerateTableFrame = () => {
+  // main
   const tableMain = document.createElement('div');
   tableMain.classList.add('cms__main');
 
-  const actionsBlock = createActionsBlock();
-  const tableBox = createTableBox();
-  const tableFooter = createTableFooter(
-      totalCount,
-      page,
-      totalPages,
-  );
+  // actions
+  const actionsBlock = document.createElement('div');
+  actionsBlock.classList.add('cms__actions');
+
+  // table
+  const tableBox = document.createElement('div');
+  tableBox.classList.add('cms__table-box');
+
+  const table = document.createElement('table');
+  table.classList.add('cms__table');
+
+  const tableHead = document.createElement('thead');
+  tableHead.classList.add('cms__table-head');
+
+  const tableBody = document.createElement('tbody');
+  tableBody.classList.add('cms__table-body');
+
+  table.append(tableHead, tableBody);
+  tableBox.append(table);
+
+  // footer
+  const tableFooter = document.createElement('div');
+  tableFooter.classList.add('cms__table-footer');
 
   tableMain.append(actionsBlock, tableBox, tableFooter);
 
-  tableMain.tableBody = tableBox.tableBody;
-
-  return tableMain;
+  return {
+    main: tableMain,
+    actions: actionsBlock,
+    thead: tableHead,
+    tbody: tableBody,
+    footer: tableFooter,
+  };
 };
 
-export {createTable};
+// заполнение таблицы
+const fillTable = (
+    thead,
+    tbody,
+    actions,
+    footer,
+    totalCount,
+    page,
+    totalPages,
+) => {
+  // actions
+  createActionsBlock(actions, page);
+
+  // table
+  createTableBox(thead, tbody, page);
+
+  // footer
+  fillTableFooter(footer, totalCount, page, totalPages);
+};
+
+
+export {crerateTableFrame, fillTable};

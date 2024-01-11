@@ -1,10 +1,6 @@
-import {tableBody} from './domElements.js';
+import {renderGoods} from './tableAppearance.js';
 import showFormMessage from './formMessage.js';
 import {fetchRequest} from './fetchRequest.js';
-import {
-  calculateMainTotalPrice,
-  createTableRow,
-} from './tableAppearance.js';
 
 // Конвертация в формат Base64
 const toBase64 = file => new Promise((resolve, reject) => {
@@ -73,13 +69,15 @@ const checkModalTotalPrice = (input, count, price, cost) => {
   });
 };
 
-// Отобразить картинку
-const createImageElem = (fileInput) => {
-  const imgBlock = document.createElement('div');
-  imgBlock.classList.add('form__block-image');
+// Отобразить ошибку размера выбранного файла
+const showImageError = errorBlock => {
+  errorBlock.textContent = 'Изображение не должно превышать размер 1 Мб';
+};
 
-  const imgElem = document.createElement('img');
-  imgElem.classList.add('form__image');
+// Создать wrapper для изображения
+const createImageWrapper = (fileInput, imgBlock) => {
+  const imgWrapper = document.createElement('div');
+  imgWrapper.classList.add('form__image-wrapper');
 
   const delBtn = document.createElement('button');
   delBtn.classList.add('form__image-delete');
@@ -99,84 +97,107 @@ const createImageElem = (fileInput) => {
     imgBlock.remove();
   });
 
-  imgBlock.append(imgElem, delBtn);
-  document.querySelector('.modal').append(imgBlock);
+  imgWrapper.append(delBtn);
 
-  return imgElem;
+  return imgWrapper;
 };
 
-// Отобразить ошибку размера файла
-const showImageError = form => {
-  const imageErrorBlock = document.createElement('div');
-  imageErrorBlock.classList.add('form__block-error');
+// Загрузить изображение
+const loadImage = (fileInput, imgBlock, src, title) => new Promise(resolve => {
+  const img = new Image();
+  img.classList.add('form__image');
+  img.src = src;
+  img.alt = title;
 
-  const imageErrorElem = document.createElement('div');
-  imageErrorElem.classList.add('form__file-error');
-  imageErrorElem.textContent = 'Изображение не должно превышать размер 1 Мб';
+  img.addEventListener('load', () => {
+    imgBlock.classList.remove('form__block-image_state_loading');
+    const wrapper = createImageWrapper(fileInput, imgBlock);
+    wrapper.append(img);
+    imgBlock.append(wrapper);
+    resolve(img);
+  });
 
-  imageErrorBlock.append(imageErrorElem);
+  img.addEventListener('error', () => {
+    console.warn('Ошибка при загрузке изображения');
+    img.remove();
+    imgBlock.classList.remove('form__block-image_state_loading');
+    imgBlock.classList.add('form__block-image_state_error');
+    imgBlock.textContent = 'Ошибка при загрузке изображения';
+    resolve(img);
+  });
+});
 
-  form.blockDiscount.after(imageErrorBlock);
+// Создать блок изображения
+const createImageBlock = (fieldset) => {
+  const imgBlock = document.createElement('div');
+  imgBlock.classList.add('form__block-image', 'form__block-image_state_loading');
+  imgBlock.textContent = 'Изображение загружается';
+
+  fieldset.append(imgBlock);
+
+  return imgBlock;
 };
 
 // Отображение изображения
-const displayImage = (src, fileInput) => {
-  if (src === './cms-backend/image/notimage.jpg') return;
+const displayImage = (src, title, fileInput, fieldset) => {
+  if (src.includes('notimage')) {
+    return;
+  } else if (!src.includes('jpg') && !src.includes('jpeg')) {
+    console.warn('Неверный формат изображения');
 
-  if (
-    !src.includes('jpg') &&
-    !src.includes('jpeg') &&
-    !src.includes('blob')
-  ) return;
-
-  const imgElem = createImageElem(fileInput);
-  imgElem.src = src;
+    const imgBlock = document.createElement('div');
+    imgBlock.className = 'form__block-image form__block-image_state_error';
+    imgBlock.textContent = 'Неверный формат изображения';
+    fieldset.append(imgBlock);
+    return;
+  } else {
+    const imgBlock = createImageBlock(fieldset);
+    loadImage(fileInput, imgBlock, src, title);
+  }
 };
 
 // Отображение файла в форме
-const showImagePreview = (form, fileInput) => {
+const showImagePreview = (title, fileInput, error, fieldset) => {
   fileInput.addEventListener('change', () => {
     if (fileInput.files.length > 0) {
       if (fileInput.files[0].size > 1048576) {
-        showImageError(form);
+        showImageError(error);
       } else {
-        const errorMessage = document.querySelector('.form__block-error');
+        error.textContent = '';
         const imageBlock = document.querySelector('.form__block-image');
 
-        if (errorMessage) errorMessage.remove();
         if (imageBlock) imageBlock.remove();
 
         const src = URL.createObjectURL(fileInput.files[0]);
-        displayImage(src, fileInput);
+        displayImage(src, title, fileInput, fieldset);
       }
     }
   });
 };
 
 // Действия после закрытия окна сообщения
-const afterMessageActions = (edit, overlay, status, data) => {
+const afterMessageActions = (overlay, status, page) => {
   overlay.remove();
   if (status < 400) {
-    if (!edit) tableBody.prepend(createTableRow(data));  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    calculateMainTotalPrice();
+    renderGoods(page);
   }
 };
 
 // Отправить данные о товаре из модального окна
-const sendData = (edit, id = null, method, overlay, productData) => {
-  fetchRequest(`http://localhost:3000/api/goods${id ? ('/' + id) : ''}`, {
+const sendData = (edit, id = null, method, overlay, productData, page) => {
+  fetchRequest(`https://chalk-yellow-sheet.glitch.me/api/goods${id ? ('/' + id) : ''}`, {
     method,
     callback(err, data) {
       if (err) {
         const status = +err.message.slice(6, 10);
         showFormMessage(edit, overlay, status, () => {
-          afterMessageActions(edit, overlay, status, data);
+          afterMessageActions(overlay, status, undefined);
         });
         return;
       }
-
+      console.log('modal data: ', data);
       showFormMessage(edit, overlay, 200, () => {
-        afterMessageActions(edit, overlay, 200, data);
+        afterMessageActions(overlay, 200, page);
       });
     },
     body: productData,
@@ -186,30 +207,26 @@ const sendData = (edit, id = null, method, overlay, productData) => {
   });
 };
 
-
 // Управление модальным окном
 const modalControl = (
     overlay,
     close,
     form,
     checkbox,
+    error,
     input,
     count,
     price,
     cost,
     file,
     id,
+    page,
 ) => {
   const [edit, method] = id ? [true, 'PATCH'] : [false, 'POST'];
 
   checkboxControl(checkbox, input);
   checkModalTotalPrice(input, count, price, cost);
-  showImagePreview(form, file);
-
-  if (file.hasAttribute('data-src') &&
-      id && file.files.length === 0) {
-    console.log('img block: ', document.querySelector('.form__block-image'));
-  }
+  showImagePreview('Загруженное изображение', file, error, form.fieldset);
 
   overlay.addEventListener('click', ({target}) => {
     if (target === overlay || target.classList.contains('modal__close')) {
@@ -223,6 +240,7 @@ const modalControl = (
 
   form.addEventListener('submit', async event => {
     event.preventDefault();
+    form.submitBtn.disabled = 'true';
     const formData = new FormData(event.target);
     const productData = Object.fromEntries(formData);
     productData.discount = productData.discount ? productData.discount : '0';
@@ -236,8 +254,10 @@ const modalControl = (
       productData.image = file.dataset.src;
     }
 
-    sendData(edit, id, method, overlay, productData);
-  });
+    sendData(edit, id, method, overlay, productData, page);
+  },
+  {once: true},
+  );
 };
 
 export {modalControl, setModalTotalPrice, displayImage};

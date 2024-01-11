@@ -62,7 +62,7 @@ const createNameBlock = () => {
 
 // Category
 const createCategorieslist = (datalist) => {
-  const categories = fetchRequest('http://localhost:3000/api/categories', {
+  fetchRequest('https://chalk-yellow-sheet.glitch.me/api/categories', {
     method: 'GET',
     callback(err, data) {
       if (err) console.warn(err);
@@ -169,6 +169,21 @@ const createDiscountBlock = () => {
   return formBlockDiscount;
 };
 
+// Large File Error
+const createImageErrorBlock = () => {
+  const imageErrorBlock = document.createElement('div');
+  imageErrorBlock.classList.add('form__block-error');
+
+  const imageErrorElem = document.createElement('div');
+  imageErrorElem.classList.add('form__file-error');
+
+  imageErrorBlock.append(imageErrorElem);
+
+  imageErrorBlock.error = imageErrorElem;
+
+  return imageErrorBlock;
+};
+
 // Description
 const createDescriptionBlock = () => {
   const formBlockDescription = document.createElement('div');
@@ -269,12 +284,15 @@ const createBottomBlock = (id) => {
 
   modalTotalPrice.append(modalTotalPriceValue);
 
-  modalBlockBottom.append(modalTotalPrice);
-  modalBlockBottom.insertAdjacentHTML('beforeend', `
-    <button class="form__button" type="submit">${id ? 'Изменить товар' : 'Добавить товар'}</button>
-  `);
+  const submitBtn = document.createElement('button');
+  submitBtn.type = 'submit';
+  submitBtn.className = 'form__button';
+  submitBtn.textContent = id ? 'Изменить товар' : 'Добавить товар';
+
+  modalBlockBottom.append(modalTotalPrice, submitBtn);
 
   modalBlockBottom.priceValue = modalTotalPriceValue;
+  modalBlockBottom.btn = submitBtn;
 
   return modalBlockBottom;
 };
@@ -293,6 +311,8 @@ const createModalForm = (id) => {
   const formBlockUnits = createUnitsBlock();
   // Discount
   const formBlockDiscount = createDiscountBlock();
+  // Large File Error
+  const imageErrorBlock = createImageErrorBlock();
   // Description
   const formBlockDescription = createDescriptionBlock();
   // Count
@@ -309,6 +329,7 @@ const createModalForm = (id) => {
       formBlockCategory,
       formBlockUnits,
       formBlockDiscount,
+      imageErrorBlock,
       formBlockDescription,
       formBlockCount,
       formBlockPrice,
@@ -317,12 +338,15 @@ const createModalForm = (id) => {
 
   modalForm.append(formFieldset, modalBlockBottom);
 
+  modalForm.fieldset = formFieldset;
   modalForm.blockDiscount = formBlockDiscount;
+  modalForm.submitBtn = modalBlockBottom.btn;
 
   return {
     modalForm,
     datalist: formBlockCategory.datalist,
     checkbox: formBlockDiscount.checkbox,
+    error: imageErrorBlock.error,
     input: formBlockDiscount.input,
     count: formBlockCount.count,
     price: formBlockPrice.price,

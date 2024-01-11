@@ -27,7 +27,7 @@ const fillFormFields = (obj, property, form) => {
 };
 
 // Отобразить модальное окно
-const showModal = async (id) => {
+const showModal = async (id, page) => {
   // CSS
   await loadStyle('assets/style/modal/modal.css');
 
@@ -51,6 +51,7 @@ const showModal = async (id) => {
     modalForm,
     datalist,
     checkbox,
+    error,
     input,
     count,
     price,
@@ -74,7 +75,7 @@ const showModal = async (id) => {
 
   // Загрузка данных в форму редактирования
   if (id) {
-    fetchRequest(`http://localhost:3000/api/goods/${id}`, {
+    fetchRequest(`https://chalk-yellow-sheet.glitch.me/api/goods/${id}`, {
       method: 'GET',
       callback(err, data) {
         if (err) console.warn(err);
@@ -88,7 +89,7 @@ const showModal = async (id) => {
           file.setAttribute('data-src', data.image);
         }
 
-        displayImage(`./cms-backend/${data.image}`, file);
+        displayImage(`https://chalk-yellow-sheet.glitch.me/${data.image}`, data.title, file, modalForm.fieldset);
 
         setModalTotalPrice(priceValue, count, price, modalForm.discount);
       },
@@ -103,12 +104,14 @@ const showModal = async (id) => {
       closeBtn,
       modalForm,
       checkbox,
+      error,
       input,
       count,
       price,
       priceValue,
       file,
       id,
+      page,
   );
 
   modal.append(modalBlockTop, closeBtn, modalForm);
@@ -117,17 +120,17 @@ const showModal = async (id) => {
 };
 
 // Открыть модальное окно
-const openModal = (btn) => {
+const openModal = (btn, page) => {
   btn.addEventListener('click', () => {
-    showModal(null);
+    showModal(null, page);
   });
 };
 
 // Открыть окно редактирования
-const openEditModal = btnEdit => {
+const openEditModal = (btnEdit, page) => {
   btnEdit.addEventListener('click', ({target}) => {
     const id = target.closest('.cms__table-row').cells[0].textContent;
-    showModal(id);
+    showModal(id, page);
   });
 };
 

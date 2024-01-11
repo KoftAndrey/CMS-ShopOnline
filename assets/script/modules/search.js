@@ -1,11 +1,16 @@
 import {
+  mainCost,
+  costDescription,
+} from './domElements.js';
+
+import {
   startLoader,
   stopLoader,
 } from './loader.js';
 
 import {
-  calculateMainTotalPrice,
   createTableRow,
+  showGoodsErrBlock,
 } from './tableAppearance.js';
 
 import {fetchRequest} from './fetchRequest.js';
@@ -21,40 +26,64 @@ const createNothingFound = () => {
 
 const searchRequest = (searchValue) => {
   startLoader();
-  fetchRequest(`http://localhost:3000/api/goods?search=${searchValue}`, {
-    method: 'GET',
-    callback(err, data) {
-      if (err) {
-        console.warn(err);
-        stopLoader();
-      }
-      console.log('search-data: ', data);
+  Promise.all([
+    fetchRequest(`https://chalk-yellow-sheet.glitch.me/api/goods?search=${searchValue}`, {
+      method: 'GET',
+      callback(err, data) {
+        if (err) {
+          console.warn(err);
+          stopLoader();
+        }
 
-      const tableBody = document.querySelector('.cms__table-body');
-      tableBody.innerHTML = '';
+        return data;
+      },
+      body: null,
+      headers: null,
+    }),
+    fetchRequest(`https://chalk-yellow-sheet.glitch.me/api/total`, {
+      method: 'GET',
+      callback(err, data) {
+        if (err) {
+          console.warn(err);
+          return null;
+        }
 
-      if (data.goods.length > 0) {
-        const tableRowArr = data.goods.map(createTableRow);
+        return data;
+      },
+      body: null,
+      headers: null,
+    }),
+  ])
+      .then(([searchData, total]) => {
+        const tableBody = document.querySelector('.cms__table-body');
+        tableBody.innerHTML = '';
 
-        tableBody.append(...tableRowArr);
+        if (searchData.goods.length > 0) {
+          const tableRowArr = searchData.goods.map(createTableRow);
 
-        stopLoader();
-        calculateMainTotalPrice();
-      } else {
-        const nothingFoundBlock = createNothingFound();
-        tableBody.append(nothingFoundBlock);
+          tableBody.append(...tableRowArr);
 
-        stopLoader();
-        calculateMainTotalPrice();
-      }
-    },
-    body: null,
-    headers: null,
-  });
+          stopLoader();
+          costDescription.textContent = 'Итоговая стоимость: ';
+          mainCost.textContent = `₽ ${total.toFixed(2)}`;
+        } else {
+          const nothingFoundBlock = createNothingFound();
+          tableBody.append(nothingFoundBlock);
+
+          stopLoader();
+          mainCost.textContent = '';
+          costDescription.textContent = '';
+        }
+      })
+      .catch(err => {
+        console.error(err);
+
+        costDescription.textContent = '';
+        const tableBody = document.querySelector('.cms__table-body');
+        tableBody.innerHTML = '';
+
+        showGoodsErrBlock(tableBody);
+      });
 };
-/*
-const serchControls = (searchInput) => {
-  searchInput.addEventListener('input', debounce(searchRequest(searchInput.value), 300));
-};
-*/
+
 export {searchRequest};

@@ -1,31 +1,35 @@
 import {
   cmsSection,
   mainCost,
+  costDescription,
 } from './domElements.js';
 
 import {
+  createTableTemplate,
+  removeTemplates,
   startLoader,
   stopLoader,
 } from './loader.js';
 
 import {delItem} from './tableControl.js';
 import {fetchRequest} from './fetchRequest.js';
-import {createTable} from './createTable.js';
+import {crerateTableFrame, fillTable} from './createTable.js';
 import {openEditModal} from './createModal.js';
 
-// Посчитать общую стоимость товаров таблицы
-const calculateMainTotalPrice = () => {
-  fetchRequest(`http://localhost:3000/api/total`, {
-    method: 'GET',
-    callback(err, data) {
-      if (err) console.warn(err);
+// Создать блок с ошибкой загрузки товаров
+const createGoodsErrBlock = () => {
+  const goodsErrBlock = document.createElement('div');
+  goodsErrBlock.classList.add('goods-error');
+  goodsErrBlock.textContent = 'Произошла ошибка';
 
-      console.log('total: ', data);
-      mainCost.textContent = `₽ ${data.toFixed(2)}`;
-    },
-    body: null,
-    headers: null,
-  });
+  return goodsErrBlock;
+};
+
+// Отобразить блок с ошибкой загрузки товаров
+const showGoodsErrBlock = tbody => {
+  const block = createGoodsErrBlock();
+  tbody.innerHTML = '';
+  tbody.append(block);
 };
 
 // Посчитать общую стоимость товаров ячейки
@@ -59,9 +63,10 @@ const checkImages = (image) => {
     imageButton.addEventListener('click', () => {
       const newWin = open();
 
-      newWin.document.body.style.backgroundImage = `url('./cms-backend/${imageButton.dataset.pic}')`;
+      newWin.document.body.style.backgroundImage = `url('https://chalk-yellow-sheet.glitch.me/${imageButton.dataset.pic}')`;
       newWin.document.body.style.backgroundRepeat = 'no-repeat';
       newWin.document.body.style.backgroundPosition = 'center';
+      newWin.document.body.style.backgroundSize = 'contain';
     });
   }
 
@@ -69,7 +74,7 @@ const checkImages = (image) => {
 };
 
 // Модальное окно-alert при удалении товара
-const crerateDeleteAlert = (row) => {
+const crerateDeleteAlert = (row, page) => {
   const alertWrapper = document.createElement('div');
   alertWrapper.classList.add('form__alert-wrapper');
 
@@ -103,7 +108,7 @@ const crerateDeleteAlert = (row) => {
 
   alertDelBtn.addEventListener('click', () => {
     alertWrapper.remove();
-    delItem(row, row.cells[0].innerText);
+    delItem(row.cells[0].innerText, page);
   });
 
   alertWrapper.append(alertBlock);
@@ -111,7 +116,7 @@ const crerateDeleteAlert = (row) => {
 };
 
 // Создать ячейку товара
-const createTableRow = ({id, title, category, discount, units, count, price, image = undefined}) => {
+const createTableRow = ({id, title, category, discount, units, count, price, image = undefined}, page) => {
   const newTableRow = document.createElement('tr');
   newTableRow.classList.add('cms__table-row');
   newTableRow.innerHTML =
@@ -159,47 +164,88 @@ const createTableRow = ({id, title, category, discount, units, count, price, ima
   `);
 
   newTableRow.append(actions);
-  openEditModal(editBtn);
+  openEditModal(editBtn, page);
   return newTableRow;
 };
 
 // Рендер таблицы
-const renderGoods = (page = undefined) => {
+const renderGoods = async (page = undefined) => {
   startLoader();
-  fetchRequest(`http://localhost:3000/api/goods${page ? ('?page=' + page) : ''}`, {
-    method: 'GET',
-    callback(err, data) {
-      if (err) {
-        console.warn(err);
+  const currentTable = document.querySelector('.cms__main');
+  if (currentTable) currentTable.remove();
+
+  const {
+    main,
+    actions,
+    thead,
+    tbody,
+    footer,
+  } = crerateTableFrame();
+
+  cmsSection.append(main);
+
+  createTableTemplate(actions, thead, tbody, footer, 10);
+
+  Promise.all([
+    fetchRequest(`https://chalk-yellow-sheet.glitch.me/api/goods${page ? ('?page=' + page) : ''}`, {
+      method: 'GET',
+      callback(err, data) {
+        if (err) {
+          console.warn(err);
+          return null;
+        }
+
+        return data;
+      },
+      body: null,
+      headers: null,
+    }),
+    fetchRequest(`https://chalk-yellow-sheet.glitch.me/api/total`, {
+      method: 'GET',
+      callback(err, data) {
+        if (err) {
+          console.warn(err);
+          return null;
+        }
+
+        return data;
+      },
+      body: null,
+      headers: null,
+    }),
+  ])
+      .then(([goodsData, total]) => {
+        removeTemplates(actions, thead, tbody, footer);
         stopLoader();
-      }
-console.log('data: ', data);
+        fillTable(
+            thead,
+            tbody,
+            actions,
+            footer,
+            goodsData.totalCount,
+            goodsData.page,
+            goodsData.pages,
+        );
+        const goodsArr = goodsData.goods.map(product => createTableRow(product, page));
+        tbody.prepend(...goodsArr);
 
-      const currentTable = document.querySelector('.cms__main');
-      if (currentTable) currentTable.remove();
-
-      const table = createTable(
-          data.totalCount,
-          data.page,
-          data.pages,
-      );
-
-      const tableRowArr = data.goods.map(createTableRow);
-
-      table.tableBody.prepend(...tableRowArr);
-      cmsSection.append(table);
-
-      stopLoader();
-      calculateMainTotalPrice();
-    },
-    body: null,
-    headers: null,
-  });
+        costDescription.textContent = 'Итоговая стоимость: ';
+        mainCost.textContent = `₽ ${total.toFixed(2)}`;
+      })
+      .catch((err) => {
+        console.error(err);
+        stopLoader();
+        costDescription.textContent = '';
+        removeTemplates(actions, thead, tbody, footer);
+        actions.remove();
+        footer.remove();
+        showGoodsErrBlock(thead);
+      });
 };
 
 export {
-  calculateMainTotalPrice,
   crerateDeleteAlert,
   createTableRow,
   renderGoods,
+  showGoodsErrBlock,
 };
